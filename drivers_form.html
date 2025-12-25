@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Driver Information | SafeRide</title>
+  <link rel="stylesheet" href="drivers_form.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h2>Driver Information</h2>
+    <p class="tagline">Complete your profile to start driving with SafeRide</p>
+
+    <form id="driverForm">
+
+      <div class="grid">
+        <div>
+          <label>Full Name</label>
+          <input type="text" id="name" placeholder="Enter full name">
+        </div>
+
+        <div>
+          <label>Phone Number</label>
+          <input type="text" id="phone" placeholder="Enter phone number">
+        </div>
+
+        <div>
+          <label>Date of Birth</label>
+          <input type="date" id="dob">
+        </div>
+
+        <div>
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="Enter email">
+        </div>
+
+        <div>
+          <label>Years of Experience</label>
+          <input type="number" id="years" placeholder="Years of experience">
+        </div>
+
+        <div>
+          <label>Vehicle Number</label>
+          <input type="text" id="vehicleNumber" placeholder="Vehicle number">
+        </div>
+
+        <div>
+          <label>License Number</label>
+          <input type="text" id="licenceNumber" placeholder="License number">
+        </div>
+      </div>
+
+      <label>Address</label>
+      <textarea id="address" rows="3" placeholder="Enter your address"></textarea>
+
+      <label>Other Platform Experience</label>
+      <textarea id="platformExp" rows="3" placeholder="Eg: Uber, Ola"></textarea>
+
+      <div class="checkbox">
+        <input type="checkbox" id="agree">
+        <label for="agree">
+          I confirm that I am above 18 years and agree to the terms
+        </label>
+      </div>
+
+      <button type="submit">Submit Details</button>
+
+    </form>
+  </div>
+</div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  /* =========================
+     FIREBASE INIT (UNCHANGED)
+     ========================= */
+  const firebaseConfig = {
+    apiKey: "AIzaSyBqW0NCGj6_fGfDBCuYR6-S_ZMsVqt6y0I",
+    authDomain: "saferide-14dae.firebaseapp.com",
+    databaseURL: "https://saferide-14dae-default-rtdb.firebaseio.com",
+    projectId: "saferide-14dae",
+    storageBucket: "saferide-14dae.appspot.com",
+    messagingSenderId: "244029270602",
+    appId: "1:244029270602:web:3f8edf95d4bb01ff5314b3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  /* =========================
+     DRIVER ONBOARDING LOGIC
+     ========================= */
+  document.addEventListener("DOMContentLoaded", () => {
+    const driverForm = document.getElementById("driverForm");
+    if (!driverForm) return;
+
+    // 🔐 Check logged-in driver
+    const currentDriver = localStorage.getItem("currentDriver");
+    if (!currentDriver) {
+      window.location.href = "drivers_login.html";
+      return;
+    }
+
+    // ⏭️ Skip if already completed
+    const isCompleted = localStorage.getItem(
+      `driverProfileCompleted_${currentDriver}`
+    );
+
+    if (isCompleted === "true") {
+      window.location.href = "driver_interface.html";
+      return;
+    }
+
+    /* =========================
+       FORM SUBMIT
+       ========================= */
+    driverForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const dob = document.getElementById("dob").value;
+      const address = document.getElementById("address").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const platformExp = document.getElementById("platformExp").value.trim();
+      const years = document.getElementById("years").value.trim();
+      const vehicleNumber = document.getElementById("vehicleNumber").value.trim();
+      const licenceNumber = document.getElementById("licenceNumber").value.trim();
+      const agreed = document.getElementById("agree").checked;
+
+      if (
+        !name || !phone || !dob || !address || !email ||
+        !platformExp || !years || !vehicleNumber || !licenceNumber
+      ) {
+        alert("Please fill in all the fields.");
+        return;
+      }
+
+      if (!agreed) {
+        alert("You must agree to the terms.");
+        return;
+      }
+
+      // 🔥 Save to Firebase
+      const newDriverRef = push(ref(db, "drivers"));
+      set(newDriverRef, {
+        name,
+        phone,
+        dob,
+        address,
+        email,
+        platformExp,
+        years,
+        vehicleNumber,
+        licenceNumber
+      })
+      .then(() => {
+        // ✅ Mark onboarding complete FOR THIS DRIVER
+        localStorage.setItem(
+          `driverProfileCompleted_${currentDriver}`,
+          "true"
+        );
+
+        alert("Driver info submitted successfully!");
+        driverForm.reset();
+        window.location.href = "driver_dashboard.html";
+      })
+      .catch((error) => {
+        console.error("Firebase Error:", error);
+        alert("Error: " + error.message);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

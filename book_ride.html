@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Book a Ride - SafeRide</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Poppins', sans-serif;
+            }
+
+            body {
+                background: #f8f9fa;
+            }
+
+            /* Navigation Styles */
+            .nav {
+                padding: 15px 5%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: white;
+                position: fixed;
+                width: 100%;
+                z-index: 1000;
+                box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            }
+
+            .logo-section {
+                display: flex;
+                align-items: center;
+            }
+
+            .logo-section span {
+                color: #4CAF50;
+                font-size: 32px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-decoration: none;
+            }
+
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 40px;
+            }
+
+            .nav_a {
+                text-decoration: none;
+                font-size: 16px;
+                color: #333;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+
+            .nav_a:hover {
+                color: #4CAF50;
+            }
+
+            /* Booking Container Styles */
+            .booking-container {
+                padding-top: 100px;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 40px;
+                padding-bottom: 60px;
+            }
+
+            .booking-section {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                width: 90%;
+                max-width: 600px;
+                transition: transform 0.3s ease;
+            }
+
+            .booking-section:hover {
+                transform: translateY(-5px);
+            }
+
+            .booking-section h2 {
+                color: #333;
+                margin-bottom: 20px;
+                text-align: center;
+                font-size: 28px;
+            }
+
+            .booking-section p {
+                color: #666;
+                margin-bottom: 30px;
+                text-align: center;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            .input-group label {
+                display: block;
+                margin-bottom: 8px;
+                color: #555;
+                font-weight: 500;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 15px;
+                border: 2px solid #eee;
+                border-radius: 10px;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+
+            .input-group input:focus {
+                border-color: #4CAF50;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            }
+
+            .booking-btn {
+                width: 100%;
+                padding: 15px;
+                background: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .booking-btn:hover {
+                background: #45a049;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            }
+
+            /* Section Divider */
+            .section-divider {
+                width: 90%;
+                max-width: 600px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                color: #666;
+                margin: 20px 0;
+            }
+
+            .divider-line {
+                flex: 1;
+                height: 1px;
+                background: #ddd;
+            }
+
+            .divider-text {
+                font-size: 14px;
+                color: #666;
+                font-weight: 500;
+            }
+
+            /* Success Message */
+            .success-message {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: #4CAF50;
+                color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                display: none;
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="nav">
+            <div class="logo-section">
+                <span>SafeRide</span>
+            </div>
+            <div class="nav-links">
+                <a href="homopage.html" class="nav_a">Home</a>
+                <a href="#" class="nav_a">Services</a>
+                <a href="#" class="nav_a">About</a>
+                <a href="#" class="nav_a">Contact</a>
+            </div>
+        </nav>
+
+        <div class="booking-container">
+            <!-- Immediate Booking Section -->
+            <div class="booking-section">
+                <h2>Book Your Ride Now</h2>
+                <p>Get instant access to nearby rides</p>
+
+                <div class="input-group">
+                    <label>Pickup Location</label>
+                    <input type="text" id="location" placeholder="Enter your pickup location">
+                </div>
+                <div class="input-group">
+                    <label>Destination</label>
+                    <input type="text" id="destination" placeholder="Enter your destination">
+                </div>
+                <button class="booking-btn" id="submitBtn">See Available Rides</button>
+            </div>
+
+            <div class="section-divider">
+                <div class="divider-line"></div>
+                <div class="divider-text">OR</div>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- Pre-booking Section -->
+            <div class="booking-section">
+                <h2>Schedule a Ride</h2>
+                <p>Plan your journey in advance</p>
+
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="tripDate">
+                </div>
+                <div class="input-group">
+                    <label>Time</label>
+                    <input type="time" id="tripTime">
+                </div>
+                <div class="input-group">
+                    <label>Pickup Location</label>
+                    <input type="text" id="pickup" placeholder="Enter pickup location">
+                </div>
+                <div class="input-group">
+                    <label>Drop Location</label>
+                    <input type="text" id="drop" placeholder="Enter drop location">
+                </div>
+                <button class="booking-btn" id="reserveBtn">Schedule Ride</button>
+            </div>
+        </div>
+
+        <div id="successMessage" class="success-message"></div>
+
+        <script>
+            document.getElementById('submitBtn').addEventListener('click', function() {
+                let location = document.getElementById('location').value;
+                let destination = document.getElementById('destination').value;
+        
+                if (location && destination) {
+                    // Clear any previous ride details
+                    localStorage.clear();
+                    
+                    // Store the complete ride details object
+                    const rideDetails = {
+                        pickup: location,
+                        destination: destination
+                    };
+                    console.log('Storing locations:', rideDetails); // Debug log
+                    localStorage.setItem('rideDetails', JSON.stringify(rideDetails));
+                    window.location.href = "map.html";
+                } else {
+                    alert("Please enter both pickup location and destination!");
+                }
+            });
+        
+            document.getElementById('reserveBtn').addEventListener('click', function() {
+                let tripDate = document.getElementById('tripDate').value;
+                let tripTime = document.getElementById('tripTime').value;
+                let pickup = document.getElementById("pickup").value;
+                let drop = document.getElementById("drop").value;
+        
+                if (tripDate && tripTime && pickup && drop) {
+                    showSuccessMessage(`Ride scheduled for ${tripDate} at ${tripTime}`);
+                } else {
+                    alert("Please fill in all required fields (date, time, pickup location, and drop location)");
+                }
+            });
+
+            function showSuccessMessage(message) {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            }
+        </script>
+    </body>
+</html> 

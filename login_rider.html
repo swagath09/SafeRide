@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SafeRide Auth</title>
+  <link rel="stylesheet" href="login_rider.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+<body>
+
+<div class="auth-container">
+
+  <div class="auth-card">
+    <h2>SafeRide</h2>
+    <p class="tagline">Your safety. Your journey.</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <span class="tab active" onclick="showLogin()">Login</span>
+      <span class="tab" onclick="showSignup()">Sign Up</span>
+      <div class="indicator"></div>
+    </div>
+
+    <!-- LOGIN -->
+    <form id="loginForm" class="form active">
+      <input type="email" id="loginEmail" placeholder="Email address" required>
+      <input type="password" placeholder="Password"  autocomplete="new-password" required>
+      <a class="forgot">Forgot password?</a>
+      <button type="submit">Login</button>
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <div class="social">
+        <button class="social-btn">
+        <i class="fa-brands fa-google"></i>
+        Continue with Google
+        </button>
+
+        <button class="social-btn">
+        <i class="fa-brands fa-apple"></i>
+        Continue with Apple
+        </button>
+
+        <button class="social-btn">
+        <i class="fa-solid fa-phone"></i>
+        Continue with Number
+        </button>
+
+      </div>
+    </form>
+
+    <!-- SIGNUP -->
+    <form id="signupForm" class="form">
+      <input type="text" placeholder="Full name" required>
+      <input type="email" id="signupEmail" placeholder="Email address" required>
+      <input type="password" placeholder="Create password" required>
+      <button type="submit">Create Account</button>
+      <p style="margin-top: 10px;">
+        Already have an Account?
+        <span class="switch-link" onclick="showLogin()">Login</span>
+
+      </p>
+      <div class="divider">
+        <span>OR</span>
+      </div>
+      <button class="social-btn">
+        <i class="fa-brands fa-google"></i>
+        Continue with Google
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+  const tabs = document.querySelectorAll(".tab");
+  const indicator = document.querySelector(".indicator");
+
+  function showLogin() {
+    loginForm.classList.add("active");
+    signupForm.classList.remove("active");
+    tabs[0].classList.add("active");
+    tabs[1].classList.remove("active");
+    indicator.style.left = "0%";
+  }
+
+  function showSignup() {
+    signupForm.classList.add("active");
+    loginForm.classList.remove("active");
+    tabs[1].classList.add("active");
+    tabs[0].classList.remove("active");
+    indicator.style.left = "50%";
+  }
+
+  /* =========================
+     SIGNUP LOGIC (PER USER)
+     ========================= */
+  signupForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("signupEmail").value.trim();
+
+    if (!email) {
+      alert("Please enter email");
+      return;
+    }
+
+    // create account for this user
+    localStorage.setItem(`userAccount_${email}`, "true");
+
+    // reset onboarding ONLY for this user
+    localStorage.removeItem(`riderProfileCompleted_${email}`);
+
+    alert("Account created successfully! Please login.");
+    showLogin();
+  });
+
+  /* =========================
+     LOGIN LOGIC (PER USER)
+     ========================= */
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+
+    if (!email) {
+      alert("Please enter email");
+      return;
+    }
+
+    // check if account exists
+    const hasAccount = localStorage.getItem(`userAccount_${email}`);
+
+    if (!hasAccount) {
+      alert("No account found. Please sign up first.");
+      showSignup();
+      return;
+    }
+
+    // set current logged-in user
+    localStorage.setItem("currentUser", email);
+
+    // check onboarding for THIS user
+    const riderCompleted =
+      localStorage.getItem(`riderProfileCompleted_${email}`);
+
+    if (riderCompleted === "true") {
+      window.location.href = "homepage.html";
+    } else {
+      window.location.href = "riders_form.html";
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

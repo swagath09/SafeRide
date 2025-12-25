@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Dashboard - SafeRide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="driver_dashboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>SafeRide Driver Dashboard</h2>
+        <div>
+            <a href="driver_profile.html">My Profile</a>
+            <a href="homepage.html">Logout</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <h2>Available Ride Requests</h2>
+        <button id="refreshBtn" class="refresh-btn">
+            <i class="fas fa-sync"></i> Refresh Requests
+        </button>
+        <div id="ridesContainer" class="rides-container">
+            
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <button id="notificationToggle" class="notification-toggle">
+        <i class="fas fa-bell"></i> Notification Sound
+    </button>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqW0NCGj6_fGfDBCuYR6-S_ZMsVqt6y0I",
+            authDomain: "saferide-14dae.firebaseapp.com",
+            databaseURL: "https://saferide-14dae-default-rtdb.firebaseio.com",
+            projectId: "saferide-14dae",
+            storageBucket: "saferide-14dae.appspot.com",
+            messagingSenderId: "244029270602",
+            appId: "1:244029270602:web:3f8edf95d4bb01ff5314b3"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Reference to rides in the database
+        const ridesRef = ref(db, 'rides');
+
+        // Create notification sound
+        const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        let isSoundMuted = false;
+
+        // Keep track of known ride IDs
+        let knownRideIds = new Set();
+
+        function getVehicleTypeClass(type) {
+            return type.toLowerCase();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            if (!isSoundMuted) {
+                notificationSound.play();
+            }
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        function displayRides(rides) {
+            const container = document.getElementById('ridesContainer');
+            container.innerHTML = '';
+
+            if (!rides || Object.keys(rides).length === 0) {
+                container.innerHTML = `
+                    <div class="no-rides">
+                        <h3>No available ride requests</h3>
+                        <p>New requests will appear here automatically</p>
+                    </div>`;
+                return;
+            }
+
+            // Check for new rides
+            Object.entries(rides).forEach(([rideId, ride]) => {
+                if (ride.status === 'pending' && !knownRideIds.has(rideId)) {
+                    showNotification(`New ${ride.vehicleType} ride request from ${ride.pickup}!`);
+                    knownRideIds.add(rideId);
+                }
+            });
+
+            Object.entries(rides).forEach(([rideId, ride]) => {
+                if (ride.status === 'pending') {
+                    const rideCard = document.createElement('div');
+                    rideCard.className = `ride-card ${!knownRideIds.has(rideId) ? 'new' : ''}`;
+                    rideCard.innerHTML = `
+                        <span class="vehicle-type ${getVehicleTypeClass(ride.vehicleType)}">
+                            ${ride.vehicleType.toUpperCase()}
+                        </span>
+                        <h3>New Ride Request</h3>
+                        <div class="ride-info">
+                            <p><strong>From:</strong> ${ride.pickup}</p>
+                            <p><strong>To:</strong> ${ride.destination}</p>
+                            <p><strong>Distance:</strong> ${ride.distance}</p>
+                            <p><strong>Est. Time:</strong> ${ride.estimatedTime}</p>
+                            <p><strong>Fare:</strong> ₹${ride.fare}</p>
+                            <p><strong>Requested:</strong> ${new Date(ride.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div class="ride-actions">
+                            <button class="accept-btn" onclick="window.acceptRide('${rideId}')">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                            <button class="reject-btn" onclick="window.rejectRide('${rideId}')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(rideCard);
+                }
+            });
+        }
+
+        // Make functions available globally
+        window.acceptRide = function(rideId) {
+            const rideRef = ref(db, `rides/${rideId}`);
+            update(rideRef, {
+                status: 'accepted',
+                driverId: 'current-driver-id', // Replace with actual driver ID
+                acceptedAt: new Date().toISOString()
+            })
+            .then(() => {
+                alert('Ride accepted successfully!');
+            })
+            .catch((error) => {
+                console.error('Error accepting ride:', error);
+                alert('Error accepting ride. Please try again.');
+            });
+        };
+
+        window.rejectRide = function(rideId) {
+            const rideRef = ref(db, `rides/${rideId}`);
+            update(rideRef, {
+                status: 'rejected',
+                rejectedAt: new Date().toISOString()
+            })
+            .then(() => {
+                alert('Ride rejected');
+            })
+            .catch((error) => {
+                console.error('Error rejecting ride:', error);
+                alert('Error rejecting ride. Please try again.');
+            });
+        };
+
+        
+        onValue(ridesRef, (snapshot) => {
+            const rides = snapshot.val();
+            displayRides(rides);
+        });
+
+        
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+           
+            alert('Refreshing ride requests...');
+        });
+
+        
+        document.getElementById('notificationToggle').addEventListener('click', (e) => {
+            isSoundMuted = !isSoundMuted;
+            const icon = e.currentTarget.querySelector('i');
+            if (isSoundMuted) {
+                icon.className = 'fas fa-bell-slash';
+                e.currentTarget.classList.add('muted');
+            } else {
+                icon.className = 'fas fa-bell';
+                e.currentTarget.classList.remove('muted');
+            }
+        });
+    </script>
+</body>
+</html> 

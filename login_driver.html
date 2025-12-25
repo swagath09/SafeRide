@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SafeRide Auth</title>
+  <link rel="stylesheet" href="login_rider.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+<body>
+
+<div class="auth-container">
+
+  <div class="auth-card">
+    <h2>SafeRide</h2>
+    <p class="tagline">Your safety. Your journey.</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <span class="tab active" onclick="showLogin()">Login</span>
+      <span class="tab" onclick="showSignup()">Sign Up</span>
+      <div class="indicator"></div>
+    </div>
+
+    <!-- LOGIN -->
+    <form id="loginForm" class="form active">
+      <input type="email" id="driverLoginEmail" placeholder="Email address" required>
+      <input type="password" placeholder="Password"  autocomplete="new-password" required>
+      <a class="forgot">Forgot password?</a>
+      <button type="submit">Login</button>
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <div class="social">
+        <button class="social-btn">
+        <i class="fa-brands fa-google"></i>
+        Continue with Google
+        </button>
+
+        <button class="social-btn">
+        <i class="fa-brands fa-apple"></i>
+        Continue with Apple
+        </button>
+
+        <button class="social-btn">
+        <i class="fa-solid fa-phone"></i>
+        Continue with Number
+        </button>
+
+      </div>
+    </form>
+
+    <!-- SIGNUP -->
+    <form id="signupForm" class="form">
+      <input type="text" placeholder="Full name" required>
+      <input type="email" id="driverSignupEmail" placeholder="Email address" required>
+      <input type="password" placeholder="Create password" required>
+      <button type="submit">Create Account</button>
+      <p style="margin-top: 10px;">
+        Already have an Account?
+        <span class="switch-link" onclick="showLogin()">Login</span>
+
+      </p>
+      <div class="divider">
+        <span>OR</span>
+      </div>
+      <button class="social-btn">
+        <i class="fa-brands fa-google"></i>
+        Continue with Google
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script>
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+  const tabs = document.querySelectorAll(".tab");
+  const indicator = document.querySelector(".indicator");
+
+  function showLogin() {
+    loginForm.classList.add("active");
+    signupForm.classList.remove("active");
+    tabs[0].classList.add("active");
+    tabs[1].classList.remove("active");
+    indicator.style.left = "0%";
+  }
+
+  function showSignup() {
+    signupForm.classList.add("active");
+    loginForm.classList.remove("active");
+    tabs[1].classList.add("active");
+    tabs[0].classList.remove("active");
+    indicator.style.left = "50%";
+  }
+
+  /* =========================
+     DRIVER SIGNUP
+     ========================= */
+  signupForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("driverSignupEmail").value.trim();
+    if (!email) {
+      alert("Please enter email");
+      return;
+    }
+
+    // create driver account
+    localStorage.setItem(`driverAccount_${email}`, "true");
+
+    // reset onboarding for this driver
+    localStorage.removeItem(`driverProfileCompleted_${email}`);
+
+    alert("Driver account created! Please login.");
+    showLogin();
+  });
+
+  /* =========================
+     DRIVER LOGIN
+     ========================= */
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("driverLoginEmail").value.trim();
+    if (!email) {
+      alert("Please enter email");
+      return;
+    }
+
+    const hasAccount = localStorage.getItem(`driverAccount_${email}`);
+    if (!hasAccount) {
+      alert("No driver account found. Please sign up first.");
+      showSignup();
+      return;
+    }
+
+    // set current driver session
+    localStorage.setItem("currentDriver", email);
+
+    const driverCompleted =
+      localStorage.getItem(`driverProfileCompleted_${email}`);
+
+    if (driverCompleted === "true") {
+      window.location.href = "driver_dashboard.html";
+    } else {
+      window.location.href = "drivers_form.html";
+    }
+  });
+</script>
+
+
+</body>
+</html>
